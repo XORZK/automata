@@ -20,7 +20,7 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 
 	@Override
 	public int hashCode() {
-		long W0 = 0x3504f333, W1 = 0xf1bbcdcb, M = 741103597;
+		int W0 = 0x3504f333, W1 = 0xf1bbcdcb, M = 741103597;
 
 		int x = Integer.parseInt(this.x.toString()),
 				y = Integer.parseInt(this.y.toString());
@@ -31,6 +31,15 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 		x *= M;
 
 		return x;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || this.getClass() != o.getClass()) { return false; }
+
+		Vec2<?> v2 = (Vec2<?>) o;
+		return (v2.getX() == this.x && v2.getY() == this.y);
 	}
 
 	@Override

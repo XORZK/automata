@@ -35,6 +35,26 @@ public class Cell {
 		return this.pos.getY();
 	}
 
+	public void setPos(Vec2<Integer> p) {
+		this.pos = p;
+	}
+
+	public Vec2<Integer> getPos() {
+		return this.pos;
+	}
+
+	public void setState(State s) {
+		this.state = s;
+	}
+
+	public State getState() {
+		return this.state;
+	}
+
+	public int getValue() {
+		return this.state.getValue();
+	}
+
 	public String toString() {
 		return String.format("%s: {%s}", this.pos.toString(), this.state.toString());
 	}
