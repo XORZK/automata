@@ -43,6 +43,7 @@ public class Automata {
 				} else {
 					neighbours[index] = new Cell(pos, State.DEAD());
 				}
+				index++;
 			}
 		}
 
@@ -65,15 +66,24 @@ public class Automata {
 		}
 	}
 
+	public void activateCell(State s, Vec2<Integer> pos) {
+		if (this.activeCells.containsKey(pos)) {
+			this.activeCells.get(pos).setState(s);
+		} else {
+			this.activeCells.put(pos, new Cell(pos, s));
+		}
+	}
+
 	public void tick() {
-		for (int i = 0; i < this.activeCells.size(); i++) {
-			Cell[] nb = this.getNeighbours(this.activeCells.get(i));
+		System.out.println(this.activeCells);
+		for (Vec2<Integer> pos : this.activeCells.keySet()) {
+			Cell[] nb = this.getNeighbours(this.activeCells.get(pos));
 			for (int k = 0; k < 8; k++) {
 				if (nb[k].getValue() > 0) continue;
 				int count = this.countNeighbours(this.getNeighbours(nb[k]));
 				this.updateCell(nb[k], count);
 			}
-			this.updateCell(this.activeCells.get(i), this.countNeighbours(nb));
+			this.updateCell(this.activeCells.get(pos), this.countNeighbours(nb));
 		}
 
 		this.activeCells = this.nextCells;
