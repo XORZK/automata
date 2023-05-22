@@ -1,36 +1,45 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
 public class Automata {
-  private boolean moore = true;
-  private State[] states;
+	private int radius = 1;
+	private boolean moore = true;
+	private Transition transition;
+	private HashMap<Vec2<Integer>, Cell> activeCells, nextCells;
 
-  public Automata(int size) {
-    this.states = new State[size];
-  }
+	public Automata() {
+		this.activeCells = new HashMap<Vec2<Integer>, Cell>();
+		this.nextCells = new HashMap<Vec2<Integer>, Cell>();
+		transition = new Transition();
+	}
 
-  public Automata(State[] s) {
-    this.states = s;
-  }
+	public Transition getTransition() {
+		return this.transition;
+	}
 
-  public State getSuccessive(State s) {
-    if (this.states == null || s == null) { return null; }
+	public ArrayList<Cell> getNeighbours(Cell c) {
+		ArrayList<Cell> neighbours = new ArrayList<Cell>();
+		for (int dx = -radius; dx <= radius; dx++) {
+			for (int dy = -radius; dy <= radius; dy++) {
+				if (dx == dy && dx == 0) {
+					continue;
+				}
 
-    State state = null;
+				Vec2<Integer> pos = new Vec2<Integer>(c.getX()+dx, c.getY()+dy);
 
-    for (int i = 0; i < this.states.length; i++) {
-      if (state == null || (this.states[i].getState() > s.getState() && this.states[i].getState() < state.getState())) { state = this.states[i]; }
-    }
+				if (this.activeCells.containsKey(pos)) {
+					neighbours.add(this.activeCells.get(pos));
+				} else {
+					neighbours.add(new Cell(pos, State.DEAD()));
+				}
+			}
+		}
 
-    return state;
-  }
+		return neighbours;
+	}
 
-  public State getPrevious(State s) {
-    if (this.states == null || s == null) { return null; }
-
-    State state = null;
-
-    for (int i = 0; i < this.states.length; i++) {
-      if (state == null || (this.states[i].getState() < s.getState() && this.states[i].getState() > state.getState())) { state = this.states[i]; }
-    }
-
-    return state;
-  }
+	public void tick() {
+		for (int i = 0; i < this.activeCells.size(); i++) {
+		}
+	}
 };

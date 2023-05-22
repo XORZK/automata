@@ -1,7 +1,9 @@
+import java.util.ArrayList;
+
 public class Main {
-  public static void main(String[] args) {
-    State a = State.ALIVE(), d = State.DEAD();
-    System.out.println(d);
-    System.out.println(a);
-  }
-}
+	public static void main(String[] args) {
+		Automata g = new Automata();
+
+		System.out.println(g.getNeighbours(new Cell()));
+	}
+};

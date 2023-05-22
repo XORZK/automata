@@ -1,41 +1,60 @@
-public class State {
-  private int STATE, COLOR;
+public class State implements Comparable<State> {
+	private int color, value;
 
-  public State() {
-    this.STATE = this.COLOR = 0;
-  }
+	public State() {
+		this.color = this.value = 0;
+	}
 
-  public State(int S) {
-    this.STATE = S;
-  }
+	public State(int v) {
+		this.value = v;
+	}
 
-  public State(int S, int C) {
-    this.STATE = S;
-    this.COLOR = C;
-  }
+	public State(int v, int c) {
+		this.value = v;
+		this.color = c;
+	}
 
-  public State(int S, String C) {
-    this.STATE = S;
-    this.COLOR = Integer.parseInt(C, 16);
-  }
+	public State(int v, String c) {
+		this.value = v;
+		this.color = Integer.parseInt(c, 16);
+	}
 
-  public static State DEAD() {
-    return new State(0, "000000");
-  }
+	public final static State DEAD() {
+		return new State(0, "000000");
+	}
 
-  public static State ALIVE() {
-    return new State(1, "FFFFFF");
-  }
+	public final static State ALIVE() {
+		return new State(1, "FFFFFF");
+	}
 
-  public int getState() {
-    return this.STATE;
-  }
+	public int getValue() {
+		return this.value;
+	}
 
-  public int getColor() {
-    return this.COLOR;
-  }
+	public int getColor() {
+		return this.color;
+	}
 
-  public String toString() {
-    return String.format("%s: 0x%x", this.STATE, this.COLOR);
-  }
+	@Override
+	public int compareTo(State s) {
+		return this.value - s.getValue();
+	}
+
+	@Override
+	public int hashCode() {
+		return Integer.valueOf(this.value).hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) { return true; }
+		if (o == null || this.getClass() != o.getClass()) { return false; }
+		State s = (State) o;
+		return (s.getValue() == this.value);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%d: 0x%x", this.value, this.color);
+	}
 };
