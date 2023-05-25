@@ -12,7 +12,6 @@ public class Main {
 		g.tick();
 		g.tick();
 		g.tick();
-		g.tick();
 		System.out.println(g.getActiveCells());
 	}
 };
