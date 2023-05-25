@@ -27,8 +27,16 @@ public class Cell {
 		this.state = s;
 	}
 
+	public void setX(int x) {
+		this.pos.setX(x);
+	}
+
 	public int getX() {
 		return this.pos.getX();
+	}
+
+	public void setY(int y) {
+		this.pos.setY(y);
 	}
 
 	public int getY() {
@@ -53,6 +61,10 @@ public class Cell {
 
 	public int getValue() {
 		return this.state.getValue();
+	}
+
+	public int getColor() {
+		return this.state.getColor();
 	}
 
 	public String toString() {

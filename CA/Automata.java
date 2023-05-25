@@ -1,17 +1,25 @@
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Automata {
 	private int radius = 1;
 	private boolean moore = true;
-	private State dead = State.DEAD(), alive = State.ALIVE();
+	final private State dead = State.DEAD(), alive = State.ALIVE();
 	private Transition transition;
 	private HashMap<Vec2<Integer>, Cell> activeCells, nextCells;
+	private Set<State> states;
 
 	public Automata() {
 		this.activeCells = new HashMap<Vec2<Integer>, Cell>();
 		this.nextCells = new HashMap<Vec2<Integer>, Cell>();
+		this.states = new HashSet<State>();
 		transition = new Transition();
+	}
+
+	public void setStates(Set<State> s) {
+		this.states = s;
 	}
 
 	public Transition getTransition() {
@@ -22,11 +30,19 @@ public class Automata {
 		this.transition = t;
 	}
 
+	public void activateCell(State s, Vec2<Integer> pos) {
+		if (this.activeCells.containsKey(pos)) {
+			this.activeCells.get(pos).setState(s);
+		} else {
+			this.activeCells.put(pos, new Cell(pos, s));
+		}
+	}
+
 	public HashMap<Vec2<Integer>, Cell> getActiveCells() {
 		return this.activeCells;
 	}
 
-	public Cell[] getNeighbours(Cell c) {
+	private Cell[] getNeighbours(Cell c) {
 		int index = 0;
 		Cell[] neighbours = new Cell[8];
 		for (int dx = -radius; dx <= radius; dx++) {
@@ -41,7 +57,7 @@ public class Automata {
 					neighbours[index] = this.activeCells.get(pos);
 					neighbours[index].setPos(pos);
 				} else {
-					neighbours[index] = new Cell(pos, State.DEAD());
+					neighbours[index] = new Cell(pos, this.dead);
 				}
 				index++;
 			}
@@ -66,13 +82,6 @@ public class Automata {
 		}
 	}
 
-	public void activateCell(State s, Vec2<Integer> pos) {
-		if (this.activeCells.containsKey(pos)) {
-			this.activeCells.get(pos).setState(s);
-		} else {
-			this.activeCells.put(pos, new Cell(pos, s));
-		}
-	}
 
 	public void tick() {
 		System.out.println(this.activeCells);

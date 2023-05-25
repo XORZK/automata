@@ -1,4 +1,5 @@
 public class State implements Comparable<State> {
+	private State successor;
 	private int color, value;
 
 	public State() {
@@ -19,6 +20,14 @@ public class State implements Comparable<State> {
 		this.color = Integer.parseInt(c, 16);
 	}
 
+	public void setNextState(State s) {
+		this.successor = s;
+	}
+
+	public State getNextState() {
+		return this.successor;
+	}
+
 	public final static State DEAD() {
 		return new State(0, "000000");
 	}
@@ -27,12 +36,24 @@ public class State implements Comparable<State> {
 		return new State(1, "FFFFFF");
 	}
 
+	public void setValue(int v) {
+		this.value = v;
+	}
+
 	public int getValue() {
 		return this.value;
 	}
 
 	public int getColor() {
 		return this.color;
+	}
+
+	public void setColor(int c) {
+		this.color = c;
+	}
+
+	public void setColor(String c) {
+		this.color = Integer.parseInt(c, 16);
 	}
 
 	@Override

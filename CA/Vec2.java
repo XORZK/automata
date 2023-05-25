@@ -18,12 +18,29 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 		return this.y;
 	}
 
+	public void setX(T px) {
+		this.x = px;
+	}
+
+	public void setY(T py) {
+		this.y = py;
+	}
+
+	public double distance(Vec2<T> v2) {
+		Vec2<Double> d1 = this.vecDouble(), d2 = v2.vecDouble();
+		return Math.sqrt(Math.pow(d1.getX() - d2.getX(), 2) + Math.pow(d1.getY() - d2.getY(), 2));
+	}
+
+	public Vec2<Double> vecDouble() {
+		return new Vec2<Double>(this.x.doubleValue(), this.y.doubleValue());
+	}
+
 	@Override
 	public int hashCode() {
 		int W0 = 0x3504f333, W1 = 0xf1bbcdcb, M = 741103597;
 
-		int x = Integer.parseInt(this.x.toString()),
-				y = Integer.parseInt(this.y.toString());
+		int x = this.x.intValue(), y = this.y.intValue();
+
 
 		x *= W0;
 		y *= W1;
