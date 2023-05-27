@@ -18,8 +18,54 @@ public class Automata {
 		transition = new Transition();
 	}
 
+	public void addState(State s) {
+		this.states.add(s);
+		this.initializeStates();
+	}
+
+	public void setStates(State[] s) {
+		for (int i = 0; i < s.length; i++) {
+			this.states.add(s[i]);
+		}
+		this.initializeStates();
+	}
+
 	public void setStates(Set<State> s) {
 		this.states = s;
+		this.initializeStates();
+	}
+
+	private void initializeState(State state) {
+		State succ = null, min = this.states.toArray(new State[this.states.size()])[0];
+
+		for (State s : this.states) {
+			min = (min.getValue() > s.getValue() ? s : min);
+			if (s.equals(state)) continue;
+
+			if (succ == null) { succ = s; }
+
+			if (s.getValue() > state.getValue()) {
+				if (succ.getValue() < state.getValue() || (succ.getValue() > state.getValue() && s.getValue() < succ.getValue())) {
+					succ = s;
+				}
+			}
+		}
+
+		succ = ((succ == null) || (succ.getValue() < state.getValue()) ? min : succ);
+
+		System.out.println(String.format("STATE %s: SUCCESSOR %s", state, succ));
+
+		state.setSuccessor(succ);
+	}
+
+	private void initializeStates() {
+		if (this.states == null) {
+			return;
+		}
+
+		for (State s : this.states) {
+			this.initializeState(s);
+		}
 	}
 
 	public Transition getTransition() {
@@ -43,7 +89,7 @@ public class Automata {
 	}
 
 	private Cell[] getNeighbours(Cell c) {
-		int index = 0;
+		int idx = 0;
 		Cell[] neighbours = new Cell[8];
 		for (int dx = -radius; dx <= radius; dx++) {
 			for (int dy = -radius; dy <= radius; dy++) {
@@ -54,12 +100,12 @@ public class Automata {
 				Vec2<Integer> pos = new Vec2<Integer>(c.getX()+dx, c.getY()+dy);
 
 				if (this.activeCells.containsKey(pos)) {
-					neighbours[index] = this.activeCells.get(pos);
-					neighbours[index].setPos(pos);
+					neighbours[idx] = this.activeCells.get(pos);
+					neighbours[idx].setPos(pos);
 				} else {
-					neighbours[index] = new Cell(pos, this.dead);
+					neighbours[idx] = new Cell(pos, this.dead);
 				}
-				index++;
+				idx++;
 			}
 		}
 

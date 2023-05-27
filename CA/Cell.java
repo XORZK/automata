@@ -67,6 +67,10 @@ public class Cell {
 		return this.state.getColor();
 	}
 
+	public Cell copy() {
+		return new Cell(this.pos, this.state);
+	}
+
 	public String toString() {
 		return String.format("%s: {%s}", this.pos.toString(), this.state.toString());
 	}

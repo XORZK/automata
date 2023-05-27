@@ -1,5 +1,7 @@
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 public class Transition {
 	// cx => (nx, c(x+1))
@@ -53,7 +55,7 @@ public class Transition {
 			return this.countTransition.get(cx).get(neighbourCount);
 		}
 
-		return State.DEAD();
+		return cx.getSuccessor();
 	}
 
 	public State getTransition(State cx, ArrayList<State> neighbourhood) {
@@ -62,7 +64,7 @@ public class Transition {
 			return this.stateTransition.get(cx).get(neighbourhood);
 		}
 
-		return State.DEAD();
+		return cx.getSuccessor();
 	}
 
 	public final static Transition GOL() {

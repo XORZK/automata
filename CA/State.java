@@ -20,11 +20,19 @@ public class State implements Comparable<State> {
 		this.color = Integer.parseInt(c, 16);
 	}
 
-	public void setNextState(State s) {
+	public State(int v, int c, State succ) {
+		this.value = v;
+		this.color = c;
+	}
+
+	public void setSuccessor(State s) {
 		this.successor = s;
 	}
 
-	public State getNextState() {
+	public State getSuccessor() {
+		if (this.successor == null) {
+			this.successor = State.DEAD();
+		}
 		return this.successor;
 	}
 
