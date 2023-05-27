@@ -1,17 +1,18 @@
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class ElectricalComponent extends Component {
-	private int width = 100, height = 100;
-	private Port[] inputs, outputs;
+public abstract class ElectricalComponent extends Component {
+	protected int width = 100, height = 100;
+	protected Port[] inputs, outputs;
 
 	public ElectricalComponent() {
-		this.inputs = this.outputs = new Port[0];
+		this.initializePorts(0, 0);
 	}
 
 	public ElectricalComponent(int px, int py) {
 		super(new Vec2<Integer>(px,py));
-		this.inputs = this.outputs = new Port[0];
+		this.initializePorts(0, 0);
 	}
 
 	public ElectricalComponent(int px, int py, int w, int h) {
@@ -20,7 +21,12 @@ public class ElectricalComponent extends Component {
 		this.height = h;
 	}
 
-	public void initializeInputs(int size) {
+	protected void initializePorts(int inputs, int outputs) {
+		this.initializeInputs(Math.max(0, inputs));
+		this.initializeOutputs(Math.max(0, outputs));
+	}
+
+	protected void initializeInputs(int size) {
 		this.inputs = new Port[size];
 
 		for (int i = 0; i < size; i++) {
@@ -28,11 +34,17 @@ public class ElectricalComponent extends Component {
 		}
 	}
 
-	public void initializeOutputs(int size) {
+	protected void initializeOutputs(int size) {
 		this.outputs = new Port[size];
 
 		for (int i = 0; i < size; i++) {
 			this.outputs[i] = new Port(this);
+		}
+	}
+
+	protected void copyOutput(Signal[] signals) {
+		for (int i = 0; i < Math.min(signals.length, this.outputs.length); i++) {
+			this.outputs[i].setSignal(signals[i]);
 		}
 	}
 
@@ -49,23 +61,59 @@ public class ElectricalComponent extends Component {
 		this.setHeight(h);
 	}
 
-	public Vec2<Integer> getDimensions() { return new Vec2<Integer>(this.getWidth(), this.getHeight()); }
+	public Vec2<Integer> getDimensions() { return new Vec2<Integer>(this.width, this.height); }
 
 	public void connect(Port p, int index) {
-		boolean input = p.isInput();
+		boolean input = p.inputPort();
 		if ((!input && (index < 0 || index >= this.inputs.length)) || (input && (index < 0 || index >= this.outputs.length))) {
 			return;
 		}
 
 		if (input) { this.outputs[index].connect(p); }
 		else { this.inputs[index].connect(p); }
+
+		this.compute();
 	}
 
-
-	public boolean intersects(Vec2<Double> pos) {
-		return true;
+	public Port[] inputPorts() {
+		return this.inputs;
 	}
 
-	public void draw(Graphics g) {
+	public Port[] outputPorts() {
+		return this.outputs;
+	}
+
+	public int[] inputs() {
+		int[] in = new int[this.inputs.length];
+
+		for (int i = 0; i < this.inputs.length; i++) {
+			in[i] = this.inputs[i].getSignal().value();
+		}
+
+		return in;
+	}
+
+	public int[] outputs() {
+		int[] out = new int[this.outputs.length];
+
+		for (int i = 0; i < this.outputs.length; i++) {
+			out[i] = this.outputs[i].getSignal().value();
+		}
+
+		return out;
+	}
+
+	public boolean intersects(Vec2<Double> pos) { return true; }
+
+	public void draw(Graphics g) {}
+
+	abstract Signal[] compute();
+
+	@Override
+	public String toString() {
+		this.compute();
+		return String.format(
+				"INPUTS: %s\nOUTPUTS: %s", Arrays.toString(this.inputs()), Arrays.toString(this.outputs())
+				);
 	}
 };

@@ -23,11 +23,11 @@ public class Port extends Component {
 	}
 
 	public Port(ElectricalComponent c) {
-		this(0,0,c);
+		this(0, 0, c);
 	}
 
 	public Port(ElectricalComponent c, boolean in) {
-		this(0,0,c);
+		this(0, 0, c);
 		this.input = in;
 	}
 
@@ -36,23 +36,22 @@ public class Port extends Component {
 	}
 
 	public Signal getSignal() {
-		return this.signal;
+		return (this.input && this.connections.size() > 0 ? this.connections.get(0).getSource().getSignal() : this.signal);
 	}
 
 	public void connect(Port p) {
-		if (p == null) {
-			return;
-		}
+		if (p == null) { return; }
 
-		Connection c = new Connection(this, p);
-		if (this.input && this.connections.size() != 0) {
-			this.connections.remove(0);
+		Connection c = (this.input ? new Connection(p, this) : new Connection(this, p));
+
+		if (this.input) {
+			if (this.connections.size() != 0) this.connections.clear();
 		}
 
 		this.connections.add(c);
 	}
 
-	public boolean isInput() {
+	public boolean inputPort() {
 		return this.input;
 	}
 
@@ -60,13 +59,13 @@ public class Port extends Component {
 		this.input = in;
 	}
 
-	public void remove(Port p) {
+	public void disconnect(Port p) {
 		if (p == null) {
 			return;
 		}
 
 		for (int i = 0; i < this.connections.size(); i++) {
-			if (this.connections.get(i).getOutput().equals(p)) {
+			if (this.connections.get(i).getDest().equals(p)) {
 				this.connections.remove(i);
 				break;
 			}

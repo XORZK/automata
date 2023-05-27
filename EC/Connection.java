@@ -1,41 +1,41 @@
 import java.awt.Graphics;
 
 public class Connection extends Component {
-	private Port input, output;
-	private Signal connection = new Signal();
+	private Port source, dest;
+	private Signal signal = new Signal();
 
 	public Connection() {
-		this.input = this.output = null;
+		this.source = this.dest = null;
 	}
 
-	public Connection(Port in, Port out) {
-		this.input = in;
-		this.output = out;
+	public Connection(Port f, Port t) {
+		this.source = f;
+		this.dest = t;
 	}
 
-	public Port getInput() {
-		return this.input;
+	public Port getSource() {
+		return this.source;
 	}
 
-	public void setInput(Port in) {
-		this.input = in;
-	}
+	public void setSource(Port s) {
+		this.source = s;
 
-	public Port getOutput() {
-		return this.output;
-	}
-
-	public void setOutput(Port out) {
-		this.output = out;
-
-		if (this.output != null) {
-			this.connection = this.output.getSignal();
+		if (this.source != null) {
+			this.signal = this.source.getSignal();
 		}
 	}
 
-	public void connect(Port in, Port out) {
-		this.setInput(in);
-		this.setOutput(out);
+	public Port getDest() {
+		return this.dest;
+	}
+
+	public void setDest(Port d) {
+		this.dest = d;
+	}
+
+	public void connect(Port f, Port t) {
+		this.setSource(f);
+		this.setDest(t);
 	}
 
 	@Override
