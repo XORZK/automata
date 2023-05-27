@@ -6,7 +6,7 @@ public class NORGate extends Gate {
 			new Signal(1 - (input[0] + input[1] - input[0]*input[1]))
 		};
 
-		this.copyOutput(out);
+		this.copy(out);
 
 		return out;
 	}

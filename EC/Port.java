@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class Port extends Component {
 	private boolean input = false;
 	private Signal signal = new Signal();
-	private ElectricalComponent component;
+	private Circuit circuit;
 	private ArrayList<Connection> connections;
 
 	public Port() {
@@ -16,17 +16,17 @@ public class Port extends Component {
 		this.connections = new ArrayList<Connection>();
 	}
 
-	public Port(int px, int py, ElectricalComponent c) {
+	public Port(int px, int py, Circuit c) {
 		this(px, py);
-		this.component = c;
+		this.circuit = c;
 		this.connections = new ArrayList<Connection>();
 	}
 
-	public Port(ElectricalComponent c) {
+	public Port(Circuit c) {
 		this(0, 0, c);
 	}
 
-	public Port(ElectricalComponent c, boolean in) {
+	public Port(Circuit c, boolean in) {
 		this(0, 0, c);
 		this.input = in;
 	}

@@ -6,7 +6,7 @@ public class XORGate extends Gate {
 			new Signal((input[0] + input[1]) % 2)
 		};
 
-		this.copyOutput(out);
+		this.copy(out);
 
 		return out;
 	}

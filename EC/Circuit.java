@@ -2,20 +2,20 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class ElectricalComponent extends Component {
+public abstract class Circuit extends Component {
 	protected int width = 100, height = 100;
 	protected Port[] inputs, outputs;
 
-	public ElectricalComponent() {
+	public Circuit() {
 		this.initializePorts(0, 0);
 	}
 
-	public ElectricalComponent(int px, int py) {
+	public Circuit(int px, int py) {
 		super(new Vec2<Integer>(px,py));
 		this.initializePorts(0, 0);
 	}
 
-	public ElectricalComponent(int px, int py, int w, int h) {
+	public Circuit(int px, int py, int w, int h) {
 		this(px, py);
 		this.width = w;
 		this.height = h;
@@ -42,7 +42,7 @@ public abstract class ElectricalComponent extends Component {
 		}
 	}
 
-	protected void copyOutput(Signal[] signals) {
+	protected void copy(Signal[] signals) {
 		for (int i = 0; i < Math.min(signals.length, this.outputs.length); i++) {
 			this.outputs[i].setSignal(signals[i]);
 		}
@@ -83,7 +83,7 @@ public abstract class ElectricalComponent extends Component {
 		return this.outputs;
 	}
 
-	public int[] inputs() {
+	protected int[] inputs() {
 		int[] in = new int[this.inputs.length];
 
 		for (int i = 0; i < this.inputs.length; i++) {
@@ -93,7 +93,7 @@ public abstract class ElectricalComponent extends Component {
 		return in;
 	}
 
-	public int[] outputs() {
+	protected int[] outputs() {
 		int[] out = new int[this.outputs.length];
 
 		for (int i = 0; i < this.outputs.length; i++) {

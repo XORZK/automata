@@ -1,4 +1,4 @@
-public class NOTGate extends ElectricalComponent {
+public class NOTGate extends Circuit {
 	public NOTGate() {
 		this.initializePorts(1, 1);
 	}
@@ -13,6 +13,7 @@ public class NOTGate extends ElectricalComponent {
 		this.initializePorts(1, 1);
 	}
 
+
 	public Signal[] compute() {
 		int[] input = this.inputs();
 
@@ -20,7 +21,7 @@ public class NOTGate extends ElectricalComponent {
 			new Signal(1 - input[0])
 		};
 
-		this.copyOutput(out);
+		this.copy(out);
 
 		return out;
 	}

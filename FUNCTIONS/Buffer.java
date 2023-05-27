@@ -1,4 +1,4 @@
-public class Buffer extends ElectricalComponent {
+public class Buffer extends Circuit {
 	public Buffer() {
 		this.initializePorts(1, 1);
 	}
@@ -18,7 +18,7 @@ public class Buffer extends ElectricalComponent {
 			this.inputs[0].getSignal()
 		};
 
-		this.copyOutput(out);
+		this.copy(out);
 
 		return out;
 	}

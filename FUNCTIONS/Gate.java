@@ -1,4 +1,4 @@
-public abstract class Gate extends ElectricalComponent {
+public abstract class Gate extends Circuit {
 	public Gate() {
 		this.initializePorts(2, 1);
 	}

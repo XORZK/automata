@@ -1,4 +1,4 @@
-public class Switch extends ElectricalComponent {
+public class Switch extends Circuit {
 	public Switch() {
 		this.initializePorts(0, 1);
 	}

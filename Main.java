@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 public class Main {
 	public static void main(String[] args) {
-		ElectricalComponent x = new NOTGate();
-		ElectricalComponent on = new Switch(), off = new Switch();
+		Circuit x = new NOTGate();
+		Circuit on = new Switch(), off = new Switch();
 
 		((Switch) on).toggle();
 
