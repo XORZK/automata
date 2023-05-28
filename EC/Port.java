@@ -41,14 +41,26 @@ public class Port extends Component {
 
 	public void connect(Port p) {
 		if (p == null) { return; }
+		if (p.inputPort() == this.inputPort()) { return; }
 
 		Connection c = (this.input ? new Connection(p, this) : new Connection(this, p));
 
-		if (this.input) {
-			if (this.connections.size() != 0) this.connections.clear();
-		}
+		this.addConnection(p);
+		p.addConnection(this);
+	}
 
+	public void addConnection(Port p) {
+		if (this.input && this.connections.size() != 0) this.connections.clear();
+		Connection c = (this.input ? new Connection(p, this) : new Connection(this, p));
 		this.connections.add(c);
+	}
+
+	public ArrayList<Connection> getConnections() {
+		return this.connections;
+	}
+
+	public Circuit getCircuit() {
+		return this.circuit;
 	}
 
 	public boolean inputPort() {

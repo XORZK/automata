@@ -72,8 +72,21 @@ public abstract class Circuit extends Component {
 		if (input) { this.outputs[index].connect(p); }
 		else { this.inputs[index].connect(p); }
 
-		this.compute();
+		this.recompute();
 	}
+
+	public void recompute() {
+		this.compute();
+		for (int i = 0; i < this.outputs.length; i++) {
+			for (Connection c : this.outputs[i].getConnections()) {
+				Port dest = c.getDest();
+				if (dest.getCircuit() != null) {
+					dest.getCircuit().recompute();
+				}
+			}
+		}
+	}
+
 
 	public Port[] inputPorts() {
 		return this.inputs;
@@ -111,7 +124,6 @@ public abstract class Circuit extends Component {
 
 	@Override
 	public String toString() {
-		this.compute();
 		return String.format(
 				"INPUTS: %s\nOUTPUTS: %s", Arrays.toString(this.inputs()), Arrays.toString(this.outputs())
 				);

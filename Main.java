@@ -5,9 +5,9 @@ public class Main {
 		Circuit x = new NOTGate();
 		Circuit on = new Switch(), off = new Switch();
 
-		((Switch) on).toggle();
-
 		x.connect(on.outputPorts()[0], 0);
+
+		((Switch) on).toggle();
 
 		System.out.println(x);
 	}

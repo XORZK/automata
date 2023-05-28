@@ -17,6 +17,7 @@ public class Switch extends Circuit {
 		this.outputs[0].setSignal(new Signal(
 				this.outputs[0].getSignal().value() == 1 ?
 				LogicalState.OFF : LogicalState.ON));
+		this.recompute();
 	}
 
 	public Signal[] compute() {
