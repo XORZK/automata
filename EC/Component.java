@@ -35,7 +35,5 @@ public abstract class Component implements Drawable, Movable {
 		this.pos = new Vec2<Integer>(px, py);
 	}
 
-	abstract public boolean intersects(Vec2<Double> pos);
-
 	abstract public void draw(Graphics g);
 };

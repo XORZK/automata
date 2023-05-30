@@ -15,7 +15,12 @@ public class Automata {
 		this.activeCells = new HashMap<Vec2<Integer>, Cell>();
 		this.nextCells = new HashMap<Vec2<Integer>, Cell>();
 		this.states = new HashSet<State>();
-		transition = new Transition();
+		this.transition = new Transition();
+	}
+
+	public Automata(Transition t) {
+		this();
+		this.transition = t;
 	}
 
 	public void addState(State s) {

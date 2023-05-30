@@ -87,7 +87,6 @@ public abstract class Circuit extends Component {
 		}
 	}
 
-
 	public Port[] inputPorts() {
 		return this.inputs;
 	}
@@ -115,8 +114,6 @@ public abstract class Circuit extends Component {
 
 		return out;
 	}
-
-	public boolean intersects(Vec2<Double> pos) { return true; }
 
 	public void draw(Graphics g) {}
 

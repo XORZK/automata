@@ -85,11 +85,6 @@ public class Port extends Component {
 	}
 
 	@Override
-	public boolean intersects(Vec2<Double> pos) {
-		return true;
-	}
-
-	@Override
 	public void draw(Graphics g) {
 	}
 };
