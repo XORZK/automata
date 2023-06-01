@@ -30,6 +30,26 @@ public class Transition {
 		this.countTransition.put(sx, inner);
 	}
 
+	public Set<State> getStates() {
+		Set<State> states = new HashSet<State>();
+
+		for (State s : stateTransition.keySet()) {
+			for (ArrayList<State> nb : stateTransition.get(s).keySet()) {
+				states.add(stateTransition.get(s).get(nb));
+			}
+			states.add(s);
+		}
+
+		for (State s : countTransition.keySet()) {
+			for (int x : countTransition.get(s).keySet()) {
+				states.add(countTransition.get(s).get(x));
+			}
+			states.add(s);
+		}
+
+		return states;
+	}
+
 	public void insert(State sx, State rx, ArrayList<State> neighbourhood) {
 		HashMap<ArrayList<State>, State> inner;
 

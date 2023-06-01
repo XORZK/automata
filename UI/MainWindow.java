@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 
 public class MainWindow extends JFrame {
-	private final int TICK_RATE = 30;
+	private final int TICK_RATE = 15;
 
 	public static enum WindowState {
 		Menu,
@@ -27,17 +27,20 @@ public class MainWindow extends JFrame {
 		this.width = w;
 		this.height = h;
 
+		this.automataSim.setVisible(false);
+
 		this.frame = new JFrame(this.title);
 		this.frame.setSize(this.width, this.height);
 		this.frame.add(this.automataSim);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+		this.frame.setVisible(true);
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public void exec() {
 		boolean quit = false;
 		while (!quit) {
 			if (this.state == WindowState.Automata) {
+				this.automataSim.setVisible(true);
 				this.automataSim.paint(this.frame.getGraphics());
 			}
 

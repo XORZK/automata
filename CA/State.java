@@ -37,11 +37,11 @@ public class State implements Comparable<State> {
 	}
 
 	public final static State DEAD() {
-		return new State(0, "000000");
+		return new State(0, "FFFFFF");
 	}
 
 	public final static State ALIVE() {
-		return new State(1, "FFFFFF");
+		return new State(1, "000000");
 	}
 
 	public void setValue(int v) {

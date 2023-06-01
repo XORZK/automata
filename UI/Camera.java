@@ -7,11 +7,12 @@ public class Camera implements Movable {
 	}
 
 	public Camera(Vec2<Integer> p) {
-		this.pos = p;
+		this.reset();
+		this.pos = (p == null ? new Vec2<Integer>(0,0) : p);
 	}
 
 	public Camera(Vec2<Integer> p, double z) {
-		this.pos = p;
+		this(p);
 		this.zoom = z;
 	}
 
@@ -19,11 +20,20 @@ public class Camera implements Movable {
 		return this.pos;
 	}
 
+	public int getY() {
+		return this.pos.getY();
+	}
+
+	public int getX() {
+		return this.pos.getX();
+	}
+
 	public void setTick(double t) {
 		this.tick = t;
 	}
 
 	public void setZoom(double z) {
+		if (z <= 0) return;
 		this.zoom = z;
 	}
 
@@ -32,7 +42,7 @@ public class Camera implements Movable {
 	}
 
 	public void zoomTick(boolean out) {
-		this.zoom += (out ? -1 : 1) * this.tick;
+		this.setZoom(this.zoom + (out ? -1 : 1) * this.tick);
 	}
 
 	public void translate(Vec2<Integer> translation) {
@@ -63,5 +73,10 @@ public class Camera implements Movable {
 		this.moveTo(0, 0);
 		this.setZoom(1);
 		this.setTick(0.125);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("[ZOOM]: %.2f\nPOS: %s", this.zoom, this.pos);
 	}
 };

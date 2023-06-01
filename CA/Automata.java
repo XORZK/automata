@@ -20,7 +20,8 @@ public class Automata {
 
 	public Automata(Transition t) {
 		this();
-		this.transition = t;
+		this.setTransition(t);
+		this.initializeStates();
 	}
 
 	public void addState(State s) {
@@ -58,8 +59,6 @@ public class Automata {
 
 		succ = ((succ == null) || (succ.getValue() < state.getValue()) ? min : succ);
 
-		System.out.println(String.format("STATE %s: SUCCESSOR %s", state, succ));
-
 		state.setSuccessor(succ);
 	}
 
@@ -79,6 +78,7 @@ public class Automata {
 
 	public void setTransition(Transition t) {
 		this.transition = t;
+		this.states = (this.transition == null ? null : this.transition.getStates());
 	}
 
 	public void activateCell(State s, Vec2<Integer> pos) {
@@ -87,6 +87,20 @@ public class Automata {
 		} else {
 			this.activeCells.put(pos, new Cell(pos, s));
 		}
+	}
+
+	public ArrayList<Cell> getBoundedCells(Vec2<Integer> center, int width, int height) {
+		ArrayList<Cell> bounded = new ArrayList<Cell>();
+
+		for (Vec2<Integer> v2 : this.activeCells.keySet()) {
+			Vec2<Integer> pos = this.activeCells.get(v2).getPos();
+			if (pos.getX() >= center.getX() - width && pos.getX() <= center.getX() + width &&
+					pos.getY() >= center.getY() - height && pos.getY() <= center.getY() + height) {
+				bounded.add(this.activeCells.get(v2));
+			}
+		}
+
+		return bounded;
 	}
 
 	public HashMap<Vec2<Integer>, Cell> getActiveCells() {
@@ -135,7 +149,6 @@ public class Automata {
 
 
 	public void tick() {
-		System.out.println(this.activeCells);
 		for (Vec2<Integer> pos : this.activeCells.keySet()) {
 			Cell[] nb = this.getNeighbours(this.activeCells.get(pos));
 			for (int k = 0; k < 8; k++) {
