@@ -1,4 +1,7 @@
-public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T>> {
+import java.io.Serializable;
+import java.util.Objects;
+
+public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T>>, Serializable {
 	private T x, y;
 
 	public Vec2(T v) {
@@ -37,17 +40,18 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 
 	@Override
 	public int hashCode() {
+		/*
 		int W0 = 0x3504f333, W1 = 0xf1bbcdcb, M = 741103597;
 
 		int x = this.x.intValue(), y = this.y.intValue();
-
 
 		x *= W0;
 		y *= W1;
 		x ^= y;
 		x *= M;
 
-		return x;
+		return x;*/
+		return Objects.hash(x, y);
 	}
 
 	@Override
@@ -56,7 +60,7 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 		if (o == null || this.getClass() != o.getClass()) { return false; }
 
 		Vec2<?> v2 = (Vec2<?>) o;
-		return (v2.getX() == this.x && v2.getY() == this.y);
+		return (v2.getX().equals(this.x) && v2.getY().equals(this.y));
 	}
 
 	@Override

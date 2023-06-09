@@ -1,9 +1,10 @@
 import java.util.HashMap;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
-public class Transition {
+public class Transition implements Serializable {
 	// cx => (nx, c(x+1))
 	private HashMap<State, HashMap<ArrayList<State>, State>> stateTransition;
 	private HashMap<State, HashMap<Integer, State>> countTransition;

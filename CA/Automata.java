@@ -1,9 +1,10 @@
 import java.util.HashMap;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
-public class Automata {
+public class Automata implements Serializable {
 	private int radius = 1;
 	private boolean moore = true;
 	final private State dead = State.DEAD(), alive = State.ALIVE();
@@ -62,6 +63,55 @@ public class Automata {
 		state.setSuccessor(succ);
 	}
 
+	public State minState() {
+		State min = null;
+		for (State s : this.states) {
+			if (min == null || s.getValue() < min.getValue()) {
+				min = s;
+			}
+		}
+		return min;
+	}
+
+	public State maxState() {
+		State max = null;
+		for (State s : this.states) {
+			if (max == null || s.getValue() > max.getValue()) {
+				max = s;
+			}
+		}
+		return max;
+	}
+
+	public Configuration createConfiguration(Vec2<Integer> start, Vec2<Integer> end) {
+		Vec2<Integer> topLeft = new Vec2<Integer>(Math.min(start.getX(), end.getX()), Math.max(start.getY(), end.getY())),
+					  bottomRight = new Vec2<Integer>(Math.max(start.getX(), end.getX()), Math.min(start.getY(), end.getY()));
+		Cell[][] cells = new Cell[Math.abs(topLeft.getY() - bottomRight.getY()) + 1][Math.abs(topLeft.getX() - bottomRight.getX()) + 1];
+
+		for (int x = 0; x <= Math.abs(topLeft.getX() - bottomRight.getX()); x++) {
+			for (int y = 0; y <= Math.abs(topLeft.getY() - bottomRight.getY()); y++) {
+				Vec2<Integer> pos = new Vec2<Integer>(topLeft.getX() + x, topLeft.getY() - y);
+				cells[y][x] = (this.activeCells.containsKey(pos) ? this.activeCells.get(pos).copy() : new Cell(this.minState()));
+			}
+		}
+
+		Configuration cfg = new Configuration(cells);
+
+		return cfg.crop();
+	}
+
+	public void toggleCell(Vec2<Integer> pos) {
+		if (this.activeCells.containsKey(pos)) {
+			Cell c = this.activeCells.get(pos);
+			c.setState(c.getState().getSuccessor());
+			if (c.getState().equals(State.DEAD())) {
+				this.activeCells.remove(pos);
+			}
+		} else {
+			this.activateCell(this.maxState(), pos);
+		}
+	}
+
 	private void initializeStates() {
 		if (this.states == null) {
 			return;
@@ -82,6 +132,10 @@ public class Automata {
 	}
 
 	public void activateCell(State s, Vec2<Integer> pos) {
+		if (s.equals(this.minState())) {
+			this.deleteCell(pos);
+			return;
+		}
 		if (this.activeCells.containsKey(pos)) {
 			this.activeCells.get(pos).setState(s);
 		} else {
@@ -89,22 +143,52 @@ public class Automata {
 		}
 	}
 
+	public void deleteCell(Vec2<Integer> pos) {
+		if (this.activeCells.containsKey(pos)) {
+			this.activeCells.remove(pos);
+		}
+	}
+
 	public ArrayList<Cell> getBoundedCells(Vec2<Integer> center, int width, int height) {
+		return this.getBoundedCells(center, width, width, height, height);
+	}
+
+	public ArrayList<Cell> getBoundedCells(Vec2<Integer> center, int leftWidth, int rightWidth, int upperHeight, int lowerHeight) {
 		ArrayList<Cell> bounded = new ArrayList<Cell>();
 
 		for (Vec2<Integer> v2 : this.activeCells.keySet()) {
 			Vec2<Integer> pos = this.activeCells.get(v2).getPos();
-			if (pos.getX() >= center.getX() - width && pos.getX() <= center.getX() + width &&
-					pos.getY() >= center.getY() - height && pos.getY() <= center.getY() + height) {
+			if (pos.getX() >= center.getX() - leftWidth && pos.getX() <= center.getX() + rightWidth &&
+					pos.getY() >= center.getY() - lowerHeight && pos.getY() <= center.getY() + upperHeight) {
 				bounded.add(this.activeCells.get(v2));
 			}
 		}
-
 		return bounded;
 	}
-
+	
 	public HashMap<Vec2<Integer>, Cell> getActiveCells() {
 		return this.activeCells;
+	}
+
+	public void addConfiguration(Configuration cfg, Vec2<Integer> pos) {
+		if (cfg == null) return;
+		cfg.setRelativePos(pos);
+		ArrayList<Cell> active = cfg.getActiveCells();
+		for (Cell c : active) {
+			this.activeCells.put(c.getPos(), c.copy());
+		}
+	}
+
+	public void addConfiguration(Configuration cfg) {
+		this.addConfiguration(cfg, cfg.getRelativePos());
+	}
+
+	public ArrayList<Vec2<Integer>> getActivePositions() {
+		ArrayList<Vec2<Integer>> pos = new ArrayList<Vec2<Integer>>();
+		for (Vec2<Integer> p : this.activeCells.keySet()) {
+			pos.add(p);
+		}
+		return pos;
 	}
 
 	private Cell[] getNeighbours(Cell c) {
@@ -120,7 +204,6 @@ public class Automata {
 
 				if (this.activeCells.containsKey(pos)) {
 					neighbours[idx] = this.activeCells.get(pos);
-					neighbours[idx].setPos(pos);
 				} else {
 					neighbours[idx] = new Cell(pos, this.dead);
 				}
@@ -129,6 +212,10 @@ public class Automata {
 		}
 
 		return neighbours;
+	}
+
+	public Cell getCell(Vec2<Integer> pos) {
+		return (this.activeCells.containsKey(pos) ? this.activeCells.get(pos) : new Cell(this.minState()));
 	}
 
 	private int countNeighbours(Cell[] nb) {
@@ -141,25 +228,34 @@ public class Automata {
 
 	private void updateCell(Cell c, int count) {
 		State s = this.transition.getTransition(c.getState(), count);
-		c.setState(s);
-		if (!s.equals(this.dead)) {
+		if (!s.equals(this.dead) && !this.nextCells.containsKey(c.getPos())) {
+			c.setNext(s);
 			this.nextCells.put(c.getPos(), c);
 		}
 	}
 
+	private void updateCell(Cell c) {
+		Cell[] neighbours = this.getNeighbours(c);
+		int count = this.countNeighbours(neighbours);
+		this.updateCell(c, count);
+	}
 
 	public void tick() {
 		for (Vec2<Integer> pos : this.activeCells.keySet()) {
-			Cell[] nb = this.getNeighbours(this.activeCells.get(pos));
-			for (int k = 0; k < 8; k++) {
-				if (nb[k].getValue() > 0) continue;
-				int count = this.countNeighbours(this.getNeighbours(nb[k]));
-				this.updateCell(nb[k], count);
+			Cell c = this.activeCells.get(pos);
+			Cell[] nb = this.getNeighbours(c);
+
+			for (int i = 0; i < nb.length; i++) {
+				this.updateCell(nb[i]);
 			}
-			this.updateCell(this.activeCells.get(pos), this.countNeighbours(nb));
+			this.updateCell(c);
 		}
 
-		this.activeCells = this.nextCells;
+		this.activeCells = new HashMap<Vec2<Integer>, Cell>(this.nextCells);
 		this.nextCells = new HashMap<Vec2<Integer>, Cell>();
+
+		for (Vec2<Integer> pos : this.activeCells.keySet()) {
+			this.activeCells.get(pos).setNext();
+		}
 	}
 };

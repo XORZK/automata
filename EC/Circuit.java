@@ -1,5 +1,4 @@
 import java.awt.Graphics;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public abstract class Circuit extends Component {

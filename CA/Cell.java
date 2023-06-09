@@ -1,6 +1,8 @@
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable {
 	private Vec2<Integer> pos;
-	private State state;
+	private State state, next;
 
 	public Cell() {
 		this.pos = new Vec2<Integer>(0,0);
@@ -37,6 +39,15 @@ public class Cell {
 
 	public void setY(int y) {
 		this.pos.setY(y);
+	}
+
+	public void setNext(State n) {
+		this.next = n;
+	}
+
+	public void setNext() {
+		this.state = this.next;
+		this.next = null;
 	}
 
 	public int getY() {

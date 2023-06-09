@@ -42,7 +42,8 @@ public class Camera implements Movable {
 	}
 
 	public void zoomTick(boolean out) {
-		this.setZoom(this.zoom + (out ? -1 : 1) * this.tick);
+		if ((this.zoom * 1/this.tick) == 0 && out) return;
+		this.setZoom(this.zoom * (out ? 1/this.tick : this.tick));
 	}
 
 	public void translate(Vec2<Integer> translation) {
@@ -72,7 +73,7 @@ public class Camera implements Movable {
 	public void reset() {
 		this.moveTo(0, 0);
 		this.setZoom(1);
-		this.setTick(0.125);
+		this.setTick(2);
 	}
 
 	@Override

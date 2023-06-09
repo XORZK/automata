@@ -1,4 +1,6 @@
-public class State implements Comparable<State> {
+import java.io.Serializable;
+
+public class State implements Comparable<State>, Serializable {
 	private State successor;
 	private int color, value;
 
@@ -37,11 +39,11 @@ public class State implements Comparable<State> {
 	}
 
 	public final static State DEAD() {
-		return new State(0, "FFFFFF");
+		return new State(0, "181818");
 	}
 
 	public final static State ALIVE() {
-		return new State(1, "000000");
+		return new State(1, "FFBBAA");
 	}
 
 	public void setValue(int v) {

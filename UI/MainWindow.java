@@ -1,8 +1,7 @@
 import javax.swing.*;
-import java.util.ArrayList;
 
 public class MainWindow extends JFrame {
-	private final int TICK_RATE = 15;
+	private final int TICK_RATE = 30;
 
 	public static enum WindowState {
 		Menu,
@@ -11,12 +10,13 @@ public class MainWindow extends JFrame {
 		Circuit
 	};
 
+	private boolean quit = false;
 	private String title = "Window";
 	private int width, height;
 	private JFrame frame;
-	private ArrayList<JComponent> components;
+	private Thread gameLoop;
 	private WindowState state = WindowState.Automata;
-	private JPanel automataSim = new AutomataSim();
+	private JPanel automataSim = new AutomataSim(this);
 
 	public MainWindow(int w, int h) {
 		this(w, h, "Window");
@@ -27,24 +27,43 @@ public class MainWindow extends JFrame {
 		this.width = w;
 		this.height = h;
 
-		this.automataSim.setVisible(false);
+		this.automataSim.setFocusable(true);
+		this.automataSim.requestFocus();
 
 		this.frame = new JFrame(this.title);
 		this.frame.setSize(this.width, this.height);
 		this.frame.add(this.automataSim);
 		this.frame.setVisible(true);
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.automataSim.setFocusable(true);
+		this.automataSim.requestFocusInWindow();
+
+		this.setup();
+		this.gameLoop.start();
 	}
 
-	public void exec() {
-		boolean quit = false;
-		while (!quit) {
-			if (this.state == WindowState.Automata) {
-				this.automataSim.setVisible(true);
-				this.automataSim.paint(this.frame.getGraphics());
-			}
+	public String getFile() {
+		JFileChooser chooser = new JFileChooser();
+		int status = chooser.showSaveDialog(this);
 
-			try { Thread.sleep(1000/TICK_RATE); } catch (Exception e) { System.out.println(e); }
+		if (status == JFileChooser.APPROVE_OPTION) {
+			String fn = chooser.getSelectedFile().getPath();
+			return fn;
 		}
+		return null;
+	}
+
+	public void setup() {
+		this.automataSim.setVisible(true);
+		this.automataSim.grabFocus();
+
+		this.gameLoop = new Thread(() -> {
+			while (!this.quit) {
+				this.frame.repaint();
+				try {
+					Thread.sleep(1000/TICK_RATE);
+				} catch (InterruptedException ex) {}
+			}
+		});
 	}
 };
