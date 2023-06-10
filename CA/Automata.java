@@ -142,7 +142,7 @@ public class Automata implements Serializable {
 		}
 	}
 
-	public void translateBounded(ArrayList<Cell> cells, Vec2<Integer> translation) {
+	public ArrayList<Cell> translateBounded(ArrayList<Cell> cells, Vec2<Integer> translation) {
 		ArrayList<Cell> translated = new ArrayList<Cell>();
 		for (Cell c : cells) {
 			Cell copy = c.copy();
@@ -158,6 +158,8 @@ public class Automata implements Serializable {
 			Cell c = translated.get(i);
 			this.activeCells.put(c.getPos(), c);
 		}
+
+		return translated;
 	}
 
 	public void deleteCell(Vec2<Integer> pos) {

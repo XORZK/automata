@@ -14,12 +14,13 @@ import java.util.ArrayList;
 public class AutomataSim extends JPanel implements Serializable {
 	private final int BACKGROUND_COLOR = State.DEAD().getColor(), SELECTED_COLOR = 0xBBAAFF, BORDER_COLOR = 0xE5E4E6;
 	private final int INITIAL_CELL_SIZE = 100, CFG_SIZE = 150, CFG_PADDING = 25;
+
 	private int cellSize = INITIAL_CELL_SIZE, xCount, yCount;
 	private Automata automata = new Automata(Transition.GOL());
 	private Camera camera = new Camera();
 	private boolean paused = true, ctrl = false, shift = false, pressed = false;
-	private ArrayList<Cell> selected = new ArrayList<Cell>();
-	private Vec2<Integer> selStart = new Vec2<Integer>(0,0), selEnd = new Vec2<Integer>(0,0); 
+	private Vec2<Integer> selStart = null, selEnd = null;
+	private ArrayList<Cell> selectedCells = null;
 	private Icon selectedIcon;
 	private ArrayList<Icon> cfg = new ArrayList<Icon>();
 	private JMenuBar menuBar;
@@ -157,33 +158,11 @@ public class AutomataSim extends JPanel implements Serializable {
 
 		this.drawCells(cells, g);
 
-		if (this.selStart != null && this.selEnd != null) {
-			ArrayList<Cell> selected = this.getSelected();
-
-			this.drawCells(selected, SELECTED_COLOR, g);
+		if (this.selStart != null && this.selEnd != null && this.selectedCells != null) {
+			this.drawCells(this.selectedCells, SELECTED_COLOR, g);
 		}
 
 		this.renderConfigurations(g);
-	}
-
-	public void cropSelected() {
-		if (selEnd == null || selStart == null) return;
-
-		Vec2<Integer> topLeft = null, bottomRight = null;
-		ArrayList<Cell> selected = this.getSelected();
-
-		for (Cell c : selected) {
-			if (c.getValue() == 0) continue;
-			if (topLeft == null) topLeft = c.getPos().copy();
-			if (bottomRight == null) bottomRight = c.getPos().copy();
-
-			topLeft.setX(Math.min(topLeft.getX(), c.getX()));
-			topLeft.setY(Math.max(topLeft.getY(), c.getY()));
-			bottomRight.setX(Math.max(bottomRight.getX(), c.getX()));
-			bottomRight.setY(Math.min(bottomRight.getY(), c.getY()));
-		}
-		selStart = topLeft;
-		selEnd = bottomRight;
 	}
 
 	public ArrayList<Cell> getSelected() {
@@ -303,8 +282,7 @@ public class AutomataSim extends JPanel implements Serializable {
 				if (selEnd == null && selStart == null) {
 					camera.translate(translate);
 				} else {
-					ArrayList<Cell> selected = getSelected();
-					automata.translateBounded(selected, translate);
+					selectedCells = automata.translateBounded(selectedCells, translate);
 					selStart = new Vec2<Integer>(selStart.getX() + translate.getX(), selStart.getY() + translate.getY());
 					selEnd = new Vec2<Integer>(selEnd.getX() + translate.getX(), selEnd.getY() + translate.getY());
 				}
@@ -319,17 +297,13 @@ public class AutomataSim extends JPanel implements Serializable {
 				case (17): { ctrl = true; break; }
 				case (27): { selEnd = selStart = null; break; }
 				case (8): {
-					if (selEnd != null && selStart != null) {
-						for (int x = Math.min(selEnd.getX(), selStart.getX()); x <= Math.max(selEnd.getX(), selStart.getX()); x++) {
-							for (int y = Math.min(selEnd.getY(), selStart.getY()); y <= Math.max(selEnd.getY(), selStart.getY()); y++) {
-								Vec2<Integer> pos = new Vec2<Integer>(x,y);
-								if (automata.getCell(pos).getValue() > 0) {
-									automata.deleteCell(pos);
-								}
-							}
+					if (selEnd != null && selStart != null && selectedCells != null) {
+						for (Cell c : selectedCells) {
+							automata.deleteCell(c.getPos());
 						}
 					}
 					selEnd = selStart = null;
+					selectedCells = null;
 					break;
 				}
 				case (83): {
@@ -373,6 +347,7 @@ public class AutomataSim extends JPanel implements Serializable {
 
 		public void mouseClicked(MouseEvent e) {
 			selEnd = selStart = null;
+			selectedCells = null;
 			Vec2<Integer> pos = toVec2(e), gridPos = this.computePos(e);
 			if (pos.getX() > CFG_SIZE + cellSize) {
 				if (selectedIcon != null) {
@@ -380,8 +355,7 @@ public class AutomataSim extends JPanel implements Serializable {
 					selectedIcon = null;
 				} else {
 					automata.toggleCell(gridPos);
-					if (!shift) { selStart = selEnd = null; }
-				}
+								}
 			} else {
 				Icon i = configurationCollision(pos);
 				if (i == null) return;
@@ -427,8 +401,7 @@ public class AutomataSim extends JPanel implements Serializable {
 				} else {
 					if (shift) { 
 						selEnd = gridPos; 
-						System.out.println(String.format("(%s, %s)", selStart.toString(), selEnd.toString()));
-						cropSelected();
+						selectedCells = getSelected();
 					}
 				}
 			}
