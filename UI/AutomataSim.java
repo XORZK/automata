@@ -17,7 +17,8 @@ public class AutomataSim extends JPanel implements Serializable {
 	private int cellSize = INITIAL_CELL_SIZE, xCount, yCount;
 	private Automata automata = new Automata(Transition.GOL());
 	private Camera camera = new Camera();
-	private boolean paused = true, ctrl = false, shift = false;
+	private boolean paused = true, ctrl = false, shift = false, pressed = false;
+	private ArrayList<Cell> selected = new ArrayList<Cell>();
 	private Vec2<Integer> selStart = new Vec2<Integer>(0,0), selEnd = new Vec2<Integer>(0,0); 
 	private Icon selectedIcon;
 	private ArrayList<Icon> cfg = new ArrayList<Icon>();
@@ -40,13 +41,12 @@ public class AutomataSim extends JPanel implements Serializable {
 		this.yCount = (this.getHeight() / cellSize);
 	}
 
-
 	private void initializeMenu() {
 		this.menuBar = new JMenuBar();
 		JMenu file = new JMenu("File"), edit = new JMenu("Edit");
 
 		JMenuItem open = new JMenuItem("Open"), save = new JMenuItem("Save"), exit = new JMenuItem("Exit"), load = new JMenuItem("Load Configurations");
-		JMenuItem clear = new JMenuItem("Clear");
+		JMenuItem clear = new JMenuItem("Clear"), rle = new JMenuItem("Add Configuration by RLE");
 
 		exit.addActionListener(new ActionListener() { public void actionPerformed(ActionEvent e) { System.exit(0); } });
 
@@ -76,7 +76,7 @@ public class AutomataSim extends JPanel implements Serializable {
 
 		open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String fn = ((MainWindow) frame).getFile();
+				String fn = ((MainWindow) frame).getFile("aut");
 				if (fn == null) return;
 				try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(fn))) {
 					Object o = stream.readObject();
@@ -93,7 +93,7 @@ public class AutomataSim extends JPanel implements Serializable {
 
 				if (fn != null) {
 					try {
-						ObjectOutputStream atomOut = new ObjectOutputStream(new FileOutputStream(String.format("%s.automata", fn)));
+						ObjectOutputStream atomOut = new ObjectOutputStream(new FileOutputStream(String.format("%s.aut", fn)));
 						atomOut.writeObject(automata);
 
 						ArrayList<Configuration> configurations = new ArrayList<Configuration>();
@@ -108,8 +108,22 @@ public class AutomataSim extends JPanel implements Serializable {
 			}
 		});
 
+
 		clear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { automata = new Automata(Transition.GOL()); }
+		});
+		
+		rle.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String fn = ((MainWindow) frame).getFile("rle");
+				if (fn != null) {
+					String contents = Main.readContents(fn);
+					Configuration c = Configuration.readRLE(contents);
+					if (c != null) {
+						addIcon(c);
+					}
+				}
+			}
 		});
 
 		file.add(open);
@@ -117,6 +131,7 @@ public class AutomataSim extends JPanel implements Serializable {
 		file.add(load);
 		file.add(exit);
 		edit.add(clear);
+		edit.add(rle);
 		this.menuBar.add(file);
 		this.menuBar.add(edit);
 		this.add(menuBar, BorderLayout.NORTH);
@@ -143,18 +158,45 @@ public class AutomataSim extends JPanel implements Serializable {
 		this.drawCells(cells, g);
 
 		if (this.selStart != null && this.selEnd != null) {
-			Vec2<Integer> center = new Vec2<Integer>((this.selStart.getX() + this.selEnd.getX())/2, (this.selStart.getY() + this.selEnd.getY())/2);
-
-			ArrayList<Cell> selected = automata.getBoundedCells(
-				center,
-				Math.abs(this.selStart.getX() - this.selEnd.getX()) / 2 + 1,
-				Math.abs(this.selStart.getY() - this.selEnd.getY()) / 2 + 1
-			);
+			ArrayList<Cell> selected = this.getSelected();
 
 			this.drawCells(selected, SELECTED_COLOR, g);
 		}
 
 		this.renderConfigurations(g);
+	}
+
+	public void cropSelected() {
+		if (selEnd == null || selStart == null) return;
+
+		Vec2<Integer> topLeft = null, bottomRight = null;
+		ArrayList<Cell> selected = this.getSelected();
+
+		for (Cell c : selected) {
+			if (c.getValue() == 0) continue;
+			if (topLeft == null) topLeft = c.getPos().copy();
+			if (bottomRight == null) bottomRight = c.getPos().copy();
+
+			topLeft.setX(Math.min(topLeft.getX(), c.getX()));
+			topLeft.setY(Math.max(topLeft.getY(), c.getY()));
+			bottomRight.setX(Math.max(bottomRight.getX(), c.getX()));
+			bottomRight.setY(Math.min(bottomRight.getY(), c.getY()));
+		}
+		selStart = topLeft;
+		selEnd = bottomRight;
+	}
+
+	public ArrayList<Cell> getSelected() {
+		if (selStart == null || selEnd == null) return null;
+		Vec2<Integer> center = new Vec2<Integer>((this.selStart.getX() + this.selEnd.getX())/2, (this.selStart.getY() + this.selEnd.getY())/2);
+
+		ArrayList<Cell> selected = automata.getBoundedCells(
+			center,
+			Math.abs(this.selStart.getX() - this.selEnd.getX()) / 2 + 1,
+			Math.abs(this.selStart.getY() - this.selEnd.getY()) / 2 + 1
+		);
+
+		return selected;
 	}
 
 	public void drawCells(ArrayList<Cell> cells, int COLOR, Graphics g) {
@@ -258,10 +300,14 @@ public class AutomataSim extends JPanel implements Serializable {
 						(ascii % 2 == 0 ? 0 : tf),
 						(ascii % 2 == 0 ? -tf : 0)
 						);
-				camera.translate(translate);
-			}
-
-			if (ascii == 8 && selEnd != null && selStart != null) {
+				if (selEnd == null && selStart == null) {
+					camera.translate(translate);
+				} else {
+					ArrayList<Cell> selected = getSelected();
+					automata.translateBounded(selected, translate);
+					selStart = new Vec2<Integer>(selStart.getX() + translate.getX(), selStart.getY() + translate.getY());
+					selEnd = new Vec2<Integer>(selEnd.getX() + translate.getX(), selEnd.getY() + translate.getY());
+				}
 			}
 
 			switch (ascii) {
@@ -301,7 +347,12 @@ public class AutomataSim extends JPanel implements Serializable {
 		}
 
 		public void keyReleased(KeyEvent event) {
-			shift = ctrl = false;
+			int ascii = event.getKeyCode();
+			switch (ascii) {
+				case (16): { shift = false; break; }
+				case (17): { ctrl = false; break; }
+				default: { break; }
+			}
 		}
 
 		public void keyTyped(KeyEvent event) {
@@ -343,6 +394,7 @@ public class AutomataSim extends JPanel implements Serializable {
 
 		public void mousePressed(MouseEvent e) {
 			Vec2<Integer> pos = toVec2(e), gridPos = this.computePos(e);
+			pressed = true;
 			if (pos.getX() > CFG_SIZE + cellSize) {
 				if (shift) { selStart = gridPos; }
 			} else {
@@ -354,10 +406,15 @@ public class AutomataSim extends JPanel implements Serializable {
 		}
 
 		public void mouseDragged(MouseEvent e) {
-			Vec2<Integer> pos = this.toVec2(e);
+			Vec2<Integer> pos = this.toVec2(e), gridPos = this.computePos(e);
 			if (selectedIcon != null) {
-				Graphics g = getGraphics();
-				g.drawImage(selectedIcon.getImage(), pos.getX(), pos.getY(), null);
+				ArrayList<Cell> selected = new ArrayList<Cell>();
+				selected.add(new Cell(gridPos, automata.minState()));
+				if (pos.getX() > CFG_SIZE + cellSize) {
+					drawCells(selected, SELECTED_COLOR, getGraphics());
+				}
+			} else if (pressed && !shift) {
+				automata.activateCell(automata.maxState(), gridPos);
 			}
 		}
 
@@ -368,9 +425,14 @@ public class AutomataSim extends JPanel implements Serializable {
 					automata.addConfiguration(selectedIcon.getConfiguration(), gridPos);
 					selectedIcon = null;
 				} else {
-					if (shift) { selEnd = gridPos; }
+					if (shift) { 
+						selEnd = gridPos; 
+						System.out.println(String.format("(%s, %s)", selStart.toString(), selEnd.toString()));
+						cropSelected();
+					}
 				}
 			}
+			pressed = false;
 		}
 	};
 
@@ -378,8 +440,8 @@ public class AutomataSim extends JPanel implements Serializable {
 		public void mouseWheelMoved(MouseWheelEvent e) {
 			double rotation = e.getWheelRotation();
 			if (ctrl) { camera.zoomTick(rotation > 0); }
-			else if (!shift && !ctrl) { camera.translate(new Vec2<Integer>(0, (int) (-rotation))); }
-			else if (shift) { camera.translate(new Vec2<Integer>((int) rotation, 0)); }
+			else if (!shift && !ctrl) { camera.translate(new Vec2<Integer>(0, (int) (-rotation * 100/cellSize))); }
+			else if (shift) { camera.translate(new Vec2<Integer>((int) (rotation * 100 / cellSize), 0)); }
 		}
 	};
 };

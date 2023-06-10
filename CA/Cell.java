@@ -29,6 +29,10 @@ public class Cell implements Serializable {
 		this.state = s;
 	}
 
+	public void translate(Vec2<Integer> translation) {
+		this.pos = new Vec2<Integer>(this.pos.getX() + translation.getX(), this.pos.getY() + translation.getY());
+	}
+
 	public void setX(int x) {
 		this.pos.setX(x);
 	}

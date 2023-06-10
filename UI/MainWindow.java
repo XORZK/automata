@@ -1,7 +1,8 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MainWindow extends JFrame {
-	private final int TICK_RATE = 30;
+	private final int TICK_RATE = 120;
 
 	public static enum WindowState {
 		Menu,
@@ -42,8 +43,15 @@ public class MainWindow extends JFrame {
 		this.gameLoop.start();
 	}
 
-	public String getFile() {
+	public String getFile(String ext) {
 		JFileChooser chooser = new JFileChooser();
+
+		if (ext != null && !ext.equals("")) {
+			chooser.setAcceptAllFileFilterUsed(false);
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(String.format("%s Files", ext), ext);
+			chooser.addChoosableFileFilter(filter);
+		}
+
 		int status = chooser.showSaveDialog(this);
 
 		if (status == JFileChooser.APPROVE_OPTION) {
@@ -51,6 +59,10 @@ public class MainWindow extends JFrame {
 			return fn;
 		}
 		return null;
+	}
+
+	public String getFile() {
+		return this.getFile(null);
 	}
 
 	public void setup() {

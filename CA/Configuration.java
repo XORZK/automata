@@ -1,8 +1,10 @@
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.awt.Color;
+import java.util.regex.Pattern;
 
 public class Configuration implements Serializable {
 	private final int BORDER_COLOR = 0xE5E4E6;
@@ -199,12 +201,99 @@ public class Configuration implements Serializable {
 
 	public String toString() {
 		String rep = "";
-		for (int x = 0; x < this.width; x++) {
-			for (int y = 0; y < this.height; y++) {
+		for (int y = 0; y < this.height; y++) {
+			for (int x = 0; x < this.width; x++) {
 				rep += String.format("[%d]", this.getCell(x, y).getValue());
 			}
-			rep += (x != (this.width - 1) ? "\n" : "");
+			rep += (y != (this.height - 1) ? "\n" : "");
 		}
 		return rep;
 	}
-};
+
+	public static Configuration readRLE(int x, int y, String pattern) {
+		if (x < 0 || y < 0 || pattern == null) return null;
+		String transformed = "";
+		Cell[][] cells = new Cell[y][x];
+		for (int ty = 0; ty < cells.length; ty++) {
+			for (int tx = 0; tx < cells[ty].length; tx++) {
+				cells[ty][tx] = new Cell(State.DEAD());
+			}
+		}
+
+		for (int i = 0; i < pattern.length(); i++) {
+			boolean flag = Character.isDigit(pattern.charAt(i));
+			char c = pattern.charAt(i);
+			
+			if (flag) {
+				int repetition = (int) (c - '0');
+				while (Character.isDigit(pattern.charAt(++i))) {
+					repetition = repetition * 10 + ((int) pattern.charAt(i) - '0');
+				}
+				char next = pattern.charAt(i);
+				for (int r = 0; r < repetition; r++) { transformed += next; }
+			} else {
+				transformed += pattern.charAt(i);
+			}
+		}
+
+		int cx = 0, cy = 0;
+		for (int i = 0; i < transformed.length(); i++) {
+			char c = transformed.charAt(i);
+			if (c == '!') break;
+			switch (c) {
+				case ('b'): {
+					cells[cy][cx++] = new Cell(State.DEAD());
+					break;
+				}
+				case ('o'): { 
+					cells[cy][cx++] = new Cell(State.ALIVE()); 
+					break;
+				}
+				case ('$'): {
+					cy++;
+					cx = 0;
+					break;
+				}
+				default: { break; }
+			}
+		}
+
+		return new Configuration(cells);
+
+	}
+
+	public static Configuration readRLE(String contents) {
+		int x = -1, y = -1;
+		String[] lines = contents.split("\n");
+
+		String dim = "", pattern = "";
+
+		for (int i = 0; i < lines.length; i++) {
+			if (lines[i].charAt(0) == '#') { continue; }
+
+			if (dim.equals("")) {
+				dim = lines[i];
+			} else {
+				pattern += lines[i];
+			}
+		}
+
+		ArrayList<Integer> dimensions = new ArrayList<Integer>();
+		Pattern dimPattern = Pattern.compile("\\d+");
+		Matcher m = dimPattern.matcher(dim);
+
+		while (m.find()) {
+			dimensions.add(Integer.parseInt(m.group()));
+		}
+
+		if (dimensions.size() >= 2) {
+			x = dimensions.get(0);
+			y = dimensions.get(1);
+		} else {
+			return null;
+		}
+
+		return Configuration.readRLE(x, y, pattern);
+
+	}
+}

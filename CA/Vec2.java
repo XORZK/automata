@@ -77,4 +77,9 @@ public class Vec2<T extends Number & Comparable<T>> implements Comparable<Vec2<T
 	public static Vec2<Integer> superposition(Vec2<Integer> v1, Vec2<Integer> v2) {
 		return new Vec2<Integer>(v1.getX() + v2.getX(), v1.getY() + v2.getY());
 	}
+
+	public Vec2<T> copy() {
+		Vec2<T> copied = new Vec2<T>(this.x, this.y);
+		return copied;
+	}
 };

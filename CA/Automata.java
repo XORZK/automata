@@ -5,8 +5,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class Automata implements Serializable {
-	private int radius = 1;
-	private boolean moore = true;
+	private int radius = 1, ticks = 0;
 	final private State dead = State.DEAD(), alive = State.ALIVE();
 	private Transition transition;
 	private HashMap<Vec2<Integer>, Cell> activeCells, nextCells;
@@ -143,6 +142,24 @@ public class Automata implements Serializable {
 		}
 	}
 
+	public void translateBounded(ArrayList<Cell> cells, Vec2<Integer> translation) {
+		ArrayList<Cell> translated = new ArrayList<Cell>();
+		for (Cell c : cells) {
+			Cell copy = c.copy();
+			copy.translate(translation);
+			translated.add(copy);
+		}
+
+		for (int i = 0; i < cells.size(); i++) {
+			this.deleteCell(cells.get(i).getPos());
+		}
+
+		for (int i = 0; i < translated.size(); i++) {
+			Cell c = translated.get(i);
+			this.activeCells.put(c.getPos(), c);
+		}
+	}
+
 	public void deleteCell(Vec2<Integer> pos) {
 		if (this.activeCells.containsKey(pos)) {
 			this.activeCells.remove(pos);
@@ -153,6 +170,7 @@ public class Automata implements Serializable {
 		return this.getBoundedCells(center, width, width, height, height);
 	}
 
+	
 	public ArrayList<Cell> getBoundedCells(Vec2<Integer> center, int leftWidth, int rightWidth, int upperHeight, int lowerHeight) {
 		ArrayList<Cell> bounded = new ArrayList<Cell>();
 
@@ -257,5 +275,10 @@ public class Automata implements Serializable {
 		for (Vec2<Integer> pos : this.activeCells.keySet()) {
 			this.activeCells.get(pos).setNext();
 		}
+		this.ticks++;
+	}
+
+	public int getTicks() {
+		return this.ticks;
 	}
 };
